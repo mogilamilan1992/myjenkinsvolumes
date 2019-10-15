@@ -1,0 +1,16 @@
+mysql:
+ image: mysql
+
+tomcat:
+ image: tomcat
+
+zabbix:
+ image: zabbix/zabbix-appliance
+
+jenkins:
+ image: jenkins/jenkins
+ ports:
+  - 6080:8080
+  - 50000:50000
+ volumes:
+  - /home/mogilamilan19921992/databases:/var/jenkins_home
