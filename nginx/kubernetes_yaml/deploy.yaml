@@ -1,0 +1,44 @@
+#create worload gcloud
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: mytomcat9
+  name: mytomcat9
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: mytomcat9
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: mytomcat9
+    spec:
+      containers:
+      - image: itechmog/mogtomcat9:v1
+        name: mytomcat9
+        resources: {}
+status: {}
+
+# create service for all
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    run: mytomcat9
+  name: mytomcat9
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    run: mytomcat9
+  type: LoadBalancer
+status:
+  loadBalancer: {}
