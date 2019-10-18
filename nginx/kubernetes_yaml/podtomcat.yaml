@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+ name: mytomcat9
+spec:
+ volumes:
+    - name: mytomcat9-vol-storage
+      persistentVolumeClaim:
+        claimName: mytomcat9-vol-clame       
+ containers:
+      - image: itechmog/mogtomcat9:v1
+        name: mytomcat9
+        ports:
+        - containerPort: 80
+          name: "http-server"
+        resources: {}
+        volumeMounts:
+         - mountPath: "/usr/local/tomcat/webapps"
+           name: mytomcat9-vol-storage
+
