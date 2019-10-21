@@ -1,13 +1,54 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mystorage
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+  replication-type: none
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: mytomcat9-vol
 spec:
-  storageClassName: manual      
+  storageClassName: mystorage      
   accessModes:
     - ReadWriteOnce
   capacity:
     storage: 10Gi
   hostPath:
-    path: /data/mytomcat9/
+    path: "/data/mytomcat9"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mytomcat9-vol-clame
+spec:
+  storageClassName: mystorage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+ name: mytomcat9
+spec:
+ volumes:
+    - name: mystorage
+      persistentVolumeClaim:
+        claimName: mytomcat9-vol-clame
+ containers:
+      - image: itechmog/mogtomcat9:v1
+        name: mytomcat9
+        ports:
+        - containerPort: 80
+          name: "http-server"
+        resources: {}
+        volumeMounts:
+         - mountPath: "/usr/local/tomcat/webapps"
+           name: mystorage
 
