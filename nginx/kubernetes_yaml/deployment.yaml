@@ -1,0 +1,84 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mystorage
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+  replication-type: none
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mytomcat9-vol
+spec:
+  storageClassName: mystorage      
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+  hostPath:
+    path: "/var/mytomcat9"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mytomcat9-vol-clame
+spec:
+  storageClassName: mystorage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: mytomcat9
+  name: mytomcat9
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: mytomcat9
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: mytomcat9
+    spec:
+      containers:
+      - name: mytomcat9
+        image: itechmog/mogtomcat9:v1
+        ports:
+        - containerPort: 80
+          name: "http-server"
+        volumeMounts:
+        - mountPath: "/usr/local/tomcat/webapps"
+          name: mystorage
+      volumes:
+      - name: mystorage
+        persistentVolumeClaim:
+          claimName: mytomcat9-vol-clame
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    run: mytomcat9
+  name: mytomcat9
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    run: mytomcat9
+  type: LoadBalancer
+status:
+  loadBalancer: {}
