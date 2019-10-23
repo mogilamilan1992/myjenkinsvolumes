@@ -65,6 +65,39 @@ spec:
         persistentVolumeClaim:
           claimName: mytomcat9-vol-clame
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: jenkins
+  name: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: jenkins
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: jenkins
+    spec:
+      containers:
+      - image: jenkins/jenkins
+        name: jenkins
+        ports:
+        - containerPort: 80
+          name: "app-server"
+        volumeMounts:
+        - mountPath: "/var/jenkins_home"
+          name: mystorage
+      volumes:
+      - name: mystorage
+        persistentVolumeClaim:
+          claimName: mytomcat9-vol-clame
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -79,6 +112,24 @@ spec:
     targetPort: 8080
   selector:
     run: mytomcat9
+  type: LoadBalancer
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    run: jenkins
+  name: jenkins
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    run: jenkins
   type: LoadBalancer
 status:
   loadBalancer: {}
